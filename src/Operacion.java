@@ -3,6 +3,7 @@
  * @author Jorge Silva Borda
  */
 public class Operacion {
+    
     public String tipoOperacion;
     public String comando;
     public String origen;
