@@ -6,8 +6,6 @@ import com.healthmarketscience.jackcess.Table;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -18,29 +16,17 @@ import javax.swing.table.TableColumnModel;
  */
 public final class Ventana extends javax.swing.JFrame {
 
+    private int total;
     private LinkedList<Operacion> ope;
     private File archivo;
     int arch;
     private final int ANCHO = 100;
     private int errs = 0;
     private int warns = 0;
-    
+
     public Ventana() {
 	initComponents();
-	TableColumnModel columnModel = salidas.getColumnModel();
-	columnModel.getColumn(0).setPreferredWidth(ANCHO);
-	columnModel.getColumn(0).setMaxWidth(ANCHO);
-	columnModel.getColumn(0).setWidth(ANCHO);
-	columnModel.getColumn(0).setMinWidth(ANCHO);
-	salidas.setColumnModel(columnModel);
-	if (System.getProperty("os.arch").contains("64")) {
-	    arch = 64;
-	    info("Sistema de 64 bits.");
-	} else {
-	    arch = 32;
-	    info("Sistema de 32 bits.");
-	}
-	info("Por favor seleccione el archivo de datos para la carga.");
+	ajustesIniciales();
     }
 
     @SuppressWarnings("unchecked")
@@ -52,6 +38,9 @@ public final class Ventana extends javax.swing.JFrame {
         txtRuta = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        chkSilencio = new javax.swing.JCheckBox();
+        jLabel2 = new javax.swing.JLabel();
+        progreso = new javax.swing.JProgressBar();
         jScrollPane1 = new javax.swing.JScrollPane();
         salidas = new javax.swing.JTable();
 
@@ -80,6 +69,14 @@ public final class Ventana extends javax.swing.JFrame {
             }
         });
 
+        chkSilencio.setSelected(true);
+        chkSilencio.setText("Modo silencioso");
+
+        jLabel2.setText("Progreso: ");
+
+        progreso.setBackground(new java.awt.Color(51, 51, 51));
+        progreso.setForeground(new java.awt.Color(51, 51, 51));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -88,14 +85,23 @@ public final class Ventana extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton2)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtRuta)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))))
+                        .addComponent(jButton1))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jButton2)
+                                .addGap(18, 18, 18)
+                                .addComponent(chkSilencio)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(10, 10, 10))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -106,8 +112,14 @@ public final class Ventana extends javax.swing.JFrame {
                     .addComponent(txtRuta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton2)
+                    .addComponent(chkSilencio))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(progreso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addContainerGap())
         );
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Información"));
@@ -117,7 +129,7 @@ public final class Ventana extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Evento", "Error"
+                "Evento", "Detalle"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -141,9 +153,9 @@ public final class Ventana extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 418, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -169,16 +181,23 @@ public final class Ventana extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkSilencio;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JProgressBar progreso;
     private javax.swing.JTable salidas;
     private javax.swing.JTextField txtRuta;
     // End of variables declaration//GEN-END:variables
 
-    public void abrirArchivo(){
+    /**
+     * Levanta el diálogo para poder buscar el archivo MDB que contiene los
+     * parámetros de distribución.
+     */
+    public void abrirArchivo() {
 	JFileChooser chooser = new JFileChooser();
 	FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos de base de datos de Microsoft Access ", "mdb");
 	chooser.setFileFilter(filter);
@@ -190,12 +209,14 @@ public final class Ventana extends javax.swing.JFrame {
 	    txtRuta.setText(archivo.getAbsolutePath());
 	}
     }
-    
+
     public void procesar(File archivo) {
 	LinkedList<Operacion> operaciones = new LinkedList();
 	try {
 	    try (Database db = DatabaseBuilder.open(archivo)) {
 		Table tabla = db.getTable("Archivos");
+		this.total = tabla.getRowCount();
+		this.progreso.setMaximum(this.total);
 		for (Row row : tabla) {
 		    Operacion o = new Operacion(
 			    row.getString("tipoOperacion"),
@@ -206,48 +227,52 @@ public final class Ventana extends javax.swing.JFrame {
 		    operaciones.add(o);
 		}
 		Thread hilo = new Thread() {
-		    
 		    @Override
 		    public void run() {
 			ejecutar(operaciones);
 		    }
 		};
 		hilo.start();
+
 	    }
 	} catch (IOException ex) {
-	    Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
+	    error("No se ha podido ejecutar: " + ex);
 	}
     }
 
     public void ejecutar(LinkedList<Operacion> operaciones) {
 	operaciones.forEach((op) -> {
-	    Operaciones opes = new Operaciones();
+	    Operaciones opes = new Operaciones(this.chkSilencio.isSelected());
 	    String[] salida = opes.procesar(op);
-	    if(salida[0].equals("WARN")){
-		warns ++;
+	    if (salida[0].equals("WARN")) {
+		warns++;
 	    }
-	    if(salida[0].equals("ERR")){
-		errs ++;
+	    if (salida[0].equals("ERR")) {
+		errs++;
 	    }
 	    log(salida);
+
+	    progreso.setValue(progreso.getValue() + 1);
+	    int porcentaje = (progreso.getValue() * 100) / this.total;
+	    progreso.setString(porcentaje + "% completado");
+	    //progreso.setStringPainted(true);
 	});
 	info("Advertencias: " + warns);
 	info("errores: " + errs);
-	if(errs == 0 && warns == 0){
+	if (errs == 0 && warns == 0) {
 	    info("Procesamiento finalizado completamente.");
-	}else if(errs > 0 && warns == 0){
+	} else if (errs > 0 && warns == 0) {
 	    info("Procesamiento finalizado con " + errs + " errores. Por favor consultar log completo.");
-	}else if(errs == 0 && warns > 0){
+	} else if (errs == 0 && warns > 0) {
 	    info("Procesamiento finalizado con " + errs + " advertencias. Por favor consultar log completo.");
-	}else if(errs > 0 && warns > 0){
+	} else if (errs > 0 && warns > 0) {
 	    info("Procesamiento finalizado con " + errs + " errores y " + warns + " advertencias. Por favor consultar log completo.");
 	}
 	salidas.scrollRectToVisible(salidas.getCellRect(salidas.getRowCount() - 1, 0, true));
 	salidas.scrollRectToVisible(salidas.getCellRect(salidas.getRowCount() - 1, 0, true));
     }
-    
+
     //Logging-------------------------------------------------------------------
-    
     public void log(String mensaje) {
 	log("", mensaje);
     }
@@ -292,5 +317,24 @@ public final class Ventana extends javax.swing.JFrame {
 
     public void error(String mensaje) {
 	log("ERROR", mensaje);
+    }
+
+    public void ajustesIniciales() {
+	TableColumnModel columnModel = salidas.getColumnModel();
+	columnModel.getColumn(0).setPreferredWidth(ANCHO);
+	columnModel.getColumn(0).setMaxWidth(ANCHO);
+	columnModel.getColumn(0).setWidth(ANCHO);
+	columnModel.getColumn(0).setMinWidth(ANCHO);
+	salidas.setColumnModel(columnModel);
+	if (System.getProperty("os.arch").contains("64")) {
+	    arch = 64;
+	    info("Sistema de 64 bits.");
+	} else {
+	    arch = 32;
+	    info("Sistema de 32 bits.");
+	}
+	info("Por favor seleccione el archivo de datos para la carga.");
+	progreso.setString("0% completado");
+	progreso.setStringPainted(true);
     }
 }
