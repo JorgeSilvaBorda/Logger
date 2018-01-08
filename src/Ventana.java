@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
@@ -19,6 +20,7 @@ public final class Ventana extends javax.swing.JFrame {
     private int total;
     private LinkedList<Operacion> ope;
     private File archivo;
+    private Database data;
     int arch;
     private final int ANCHO = 100;
     private int errs = 0;
@@ -41,6 +43,7 @@ public final class Ventana extends javax.swing.JFrame {
         chkSilencio = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
         progreso = new javax.swing.JProgressBar();
+        jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         salidas = new javax.swing.JTable();
 
@@ -77,6 +80,16 @@ public final class Ventana extends javax.swing.JFrame {
         progreso.setBackground(new java.awt.Color(51, 51, 51));
         progreso.setForeground(new java.awt.Color(51, 51, 51));
 
+        jLabel3.setForeground(new java.awt.Color(0, 153, 255));
+        jLabel3.setText("Qué es esto?");
+        jLabel3.setToolTipText("Click para información");
+        jLabel3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel3MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -85,23 +98,25 @@ public final class Ventana extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                        .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRuta)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(10, 10, 10))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtRuta)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jButton2)
                                 .addGap(18, 18, 18)
                                 .addComponent(chkSilencio)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addGap(10, 10, 10))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel3)
+                                .addGap(674, 674, 674)))
+                        .addComponent(jButton1))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -114,8 +129,9 @@ public final class Ventana extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2)
-                    .addComponent(chkSilencio))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                    .addComponent(chkSilencio)
+                    .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(progreso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
@@ -148,7 +164,7 @@ public final class Ventana extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1038, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -168,11 +184,21 @@ public final class Ventana extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 	if (archivo != null) {
 	    info("El archivo de bases de datos es: " + archivo.getAbsolutePath());
+	    try{
+		data = DatabaseBuilder.open(archivo);
+	    }catch (IOException ex) {
+		System.out.println(ex);
+	    }
 	    procesar(archivo);
 	} else {
 	    warn("No se ha seleccionado ningún archivo.");
+	    popInfo("Debe seleccionar un archivo para poder abrir los datos.");
 	}
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
+	popInfo("El modo silencioso previente la muestra de ventanas de información a medida que se registran las librerías o surgen errores.\nDesactívelo para poder ver las ventanas de confirmación de windows.");
+    }//GEN-LAST:event_jLabel3MouseClicked
 
     public static void main(String args[]) {
 	java.awt.EventQueue.invokeLater(() -> {
@@ -186,6 +212,7 @@ public final class Ventana extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JProgressBar progreso;
@@ -336,5 +363,13 @@ public final class Ventana extends javax.swing.JFrame {
 	info("Por favor seleccione el archivo de datos para la carga.");
 	progreso.setString("0% completado");
 	progreso.setStringPainted(true);
+    }
+    
+    public void popInfo(String mensaje){
+	JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    public void popAlert(String mensaje){
+	JOptionPane.showMessageDialog(this, mensaje, "Alerta", JOptionPane.WARNING_MESSAGE);
     }
 }
