@@ -5,10 +5,12 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
-import javax.swing.JFileChooser;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
@@ -25,10 +27,12 @@ public final class Ventana extends javax.swing.JFrame {
     private final int ANCHO = 100;
     private int errs = 0;
     private int warns = 0;
+    private final String RUTA_MDB = "\\\\vmdvorak\\Aplicaciones\\UltimasVersiones60";
 
     public Ventana() {
 	initComponents();
 	ajustesIniciales();
+	cargarConfig();
     }
 
     @SuppressWarnings("unchecked")
@@ -36,9 +40,6 @@ public final class Ventana extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        txtRuta = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         chkSilencio = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
@@ -52,18 +53,6 @@ public final class Ventana extends javax.swing.JFrame {
         setResizable(false);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuración"));
-
-        jLabel1.setText("Origen de datos: ");
-
-        txtRuta.setEditable(false);
-        txtRuta.setBackground(new java.awt.Color(255, 255, 255));
-
-        jButton1.setText("Seleccione");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
 
         jButton2.setText("Ejecutar");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -100,42 +89,28 @@ public final class Ventana extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(10, 10, 10))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtRuta)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton2)
-                                .addGap(18, 18, 18)
-                                .addComponent(chkSilencio)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel3)
-                                .addGap(674, 674, 674)))
-                        .addComponent(jButton1))))
+                        .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, 952, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton2)
+                        .addGap(18, 18, 18)
+                        .addComponent(chkSilencio)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtRuta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2)
                     .addComponent(chkSilencio)
                     .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(progreso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(progreso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Información"));
@@ -169,30 +144,23 @@ public final class Ventana extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 418, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 469, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-	abrirArchivo();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-	if (archivo != null) {
+	if (abrirArchivo()) {
 	    info("El archivo de bases de datos es: " + archivo.getAbsolutePath());
-	    try{
+	    try {
 		data = DatabaseBuilder.open(archivo);
-	    }catch (IOException ex) {
+	    } catch (IOException ex) {
 		System.out.println(ex);
 	    }
 	    procesar(archivo);
-	} else {
-	    warn("No se ha seleccionado ningún archivo.");
-	    popInfo("Debe seleccionar un archivo para poder abrir los datos.");
 	}
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -208,33 +176,26 @@ public final class Ventana extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkSilencio;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JProgressBar progreso;
     private javax.swing.JTable salidas;
-    private javax.swing.JTextField txtRuta;
     // End of variables declaration//GEN-END:variables
 
     /**
      * Levanta el diálogo para poder buscar el archivo MDB que contiene los
      * parámetros de distribución.
      */
-    public void abrirArchivo() {
-	JFileChooser chooser = new JFileChooser();
-	FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos de base de datos de Microsoft Access ", "mdb");
-	chooser.setFileFilter(filter);
-	chooser.setApproveButtonText("Abrir");
-	chooser.setApproveButtonMnemonic('a');
-	int returnVal = chooser.showOpenDialog(this);
-	if (returnVal == JFileChooser.APPROVE_OPTION) {
-	    archivo = chooser.getSelectedFile();
-	    txtRuta.setText(archivo.getAbsolutePath());
+    public boolean abrirArchivo() {
+	this.archivo = new File(RUTA_MDB);
+	if (this.archivo.exists()) {
+	    return true;
 	}
+	System.out.println("No se puede encontrar el archvo '" + RUTA_MDB + "'");
+	return false;
     }
 
     public void procesar(File archivo) {
@@ -298,6 +259,40 @@ public final class Ventana extends javax.swing.JFrame {
 	salidas.scrollRectToVisible(salidas.getCellRect(salidas.getRowCount() - 1, 0, true));
 	salidas.scrollRectToVisible(salidas.getCellRect(salidas.getRowCount() - 1, 0, true));
     }
+    
+    public void ajustesIniciales() {
+	TableColumnModel columnModel = salidas.getColumnModel();
+	columnModel.getColumn(0).setPreferredWidth(ANCHO);
+	columnModel.getColumn(0).setMaxWidth(ANCHO);
+	columnModel.getColumn(0).setWidth(ANCHO);
+	columnModel.getColumn(0).setMinWidth(ANCHO);
+	salidas.setColumnModel(columnModel);
+	if (System.getProperty("os.arch").contains("64")) {
+	    arch = 64;
+	    info("Sistema de 64 bits.");
+	} else {
+	    arch = 32;
+	    info("Sistema de 32 bits.");
+	}
+	info("Por favor seleccione el archivo de datos para la carga.");
+	progreso.setString("0% completado");
+	progreso.setStringPainted(true);
+    }
+    
+    public void cargarConfig(){
+	try {
+	    File fileConfig = new File(recursos.config.Config.RUTA_ARCHIVO_MDB + recursos.config.Config.NOMBRE_ARCHIVO_MDB);
+	    System.out.println("Ruta: " + recursos.config.Config.RUTA_ARCHIVO_MDB + recursos.config.Config.NOMBRE_ARCHIVO_MDB);
+	    if(fileConfig.exists()){
+		System.out.println("Se puede leer");
+		
+	    }else{
+		System.out.println("No se puede leer");
+	    }
+	} catch (Exception ex) {
+	    Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
+	}
+    }
 
     //Logging-------------------------------------------------------------------
     public void log(String mensaje) {
@@ -346,30 +341,11 @@ public final class Ventana extends javax.swing.JFrame {
 	log("ERROR", mensaje);
     }
 
-    public void ajustesIniciales() {
-	TableColumnModel columnModel = salidas.getColumnModel();
-	columnModel.getColumn(0).setPreferredWidth(ANCHO);
-	columnModel.getColumn(0).setMaxWidth(ANCHO);
-	columnModel.getColumn(0).setWidth(ANCHO);
-	columnModel.getColumn(0).setMinWidth(ANCHO);
-	salidas.setColumnModel(columnModel);
-	if (System.getProperty("os.arch").contains("64")) {
-	    arch = 64;
-	    info("Sistema de 64 bits.");
-	} else {
-	    arch = 32;
-	    info("Sistema de 32 bits.");
-	}
-	info("Por favor seleccione el archivo de datos para la carga.");
-	progreso.setString("0% completado");
-	progreso.setStringPainted(true);
-    }
-    
-    public void popInfo(String mensaje){
+    public void popInfo(String mensaje) {
 	JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    public void popAlert(String mensaje){
+
+    public void popAlert(String mensaje) {
 	JOptionPane.showMessageDialog(this, mensaje, "Alerta", JOptionPane.WARNING_MESSAGE);
     }
 }
